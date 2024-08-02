@@ -125,6 +125,8 @@ h2 {
     border-radius: 5px;
     cursor: pointer;
     display: block;
+    width: 40%;
+    margin: 10px 0 0 0;
 }
 
 .checkbox-container {
@@ -139,4 +141,18 @@ h2 {
 
 .checkbox-container label {
     font-size: 20px;
+}
+
+.radio-container,
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+}
+
+.radio-container input[type="radio"],
+.checkbox-container input[type="checkbox"] {
+    transform: scale(1.5);
+    margin: 0;
 }

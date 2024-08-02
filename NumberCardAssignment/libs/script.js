@@ -1,11 +1,11 @@
 const numberOfCards = 3;
 const valueOfCards = [7, 4, 2];
 const questions = [
-    { type: "text", question: "What is the largest number of all?" },
-    { type: "text", question: "What is the smallest number of all?" },
-    { type: "checkbox", question: "Select all numbers greater than 400" }
+    { type: "single", question: "What is the largest number of all?" },
+    { type: "single", question: "What is the smallest number of all?" },
+    { type: "multiple", question: "Select all numbers smaller than 400" },
+    { type: "multiple", question: "Select all numbers greater than 400" },
 ];
-
 
 let currentNumber = '';
 let usedCombinations = new Set();
@@ -17,6 +17,59 @@ function factorial(n) {
     return (n <= 1) ? 1 : n * factorial(n - 1);
 }
 
+// Create the main structure of the page
+function createPageStructure() {
+    const container = document.createElement('div');
+    container.classList.add('container');
+
+    const leftPanel = document.createElement('div');
+    leftPanel.classList.add('left-panel');
+
+    const rightPanel = document.createElement('div');
+    rightPanel.classList.add('right-panel');
+
+    const leftPanelHeading = document.createElement('h2');
+    leftPanelHeading.textContent = 'Shown below are few Number Cards';
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('button-container');
+    buttonContainer.id = 'buttonContainer';
+
+    const currentNumberDiv = document.createElement('div');
+    currentNumberDiv.id = 'currentNumber';
+
+    const questionContainer = document.createElement('div');
+    questionContainer.id = 'questionContainer';
+    questionContainer.style.display = 'none';
+
+    const rightPanelHeading = document.createElement('h2');
+    rightPanelHeading.textContent = 'Number List';
+
+    const numberList = document.createElement('div');
+    numberList.classList.add('number-list');
+    numberList.id = 'numberList';
+
+    const popup = document.createElement('div');
+    popup.classList.add('popup');
+    popup.id = 'popup';
+    popup.innerHTML = '<p>This combination has already been used!</p>';
+
+    leftPanel.appendChild(leftPanelHeading);
+    leftPanel.appendChild(buttonContainer);
+    leftPanel.appendChild(currentNumberDiv);
+    leftPanel.appendChild(questionContainer);
+
+    rightPanel.appendChild(rightPanelHeading);
+    rightPanel.appendChild(numberList);
+
+    container.appendChild(leftPanel);
+    container.appendChild(rightPanel);
+
+    document.body.appendChild(container);
+    document.body.appendChild(popup);
+
+    initializeButtons();
+}
 
 function initializeButtons() {
     const buttonContainer = document.getElementById('buttonContainer');
@@ -87,7 +140,6 @@ function resetSelection() {
     });
 }
 
-
 function showPopup() {
     const popup = document.getElementById('popup');
     popup.style.display = 'block';
@@ -120,32 +172,66 @@ function showNextQuestion() {
         questionElement.innerHTML = `<p>${questions[currentQuestionIndex].question}</p>`;
         questionContainer.appendChild(questionElement);
 
-        if (questions[currentQuestionIndex].type === "text") {
-            const inputElement = document.createElement('input');
-            inputElement.type = 'number';
-            inputElement.className = 'answer-input';
-            inputElement.id = 'currentAnswer';
-            questionContainer.appendChild(inputElement);
-        } else if (questions[currentQuestionIndex].type === "checkbox") {
-            const checkboxContainer = document.createElement('div');
-            checkboxContainer.id = 'checkboxContainer';
-            Array.from(usedCombinations).forEach(number => {
-                const checkbox = document.createElement('div');
-                checkbox.className = 'checkbox-container';
-                checkbox.innerHTML = `
-                            <input type="checkbox" id="checkbox-${number}" value="${number}">
-                            <label for="checkbox-${number}">${number}</label>
-                        `;
-                checkboxContainer.appendChild(checkbox);
+        const numberList = document.getElementById('numberList');
+        const allNumbers = Array.from(usedCombinations).map(String);
+        numberList.innerHTML = ''; // Clear previous inputs
+
+        if (questions[currentQuestionIndex].type === "single") {
+            allNumbers.forEach(number => {
+                const combinationElement = document.createElement('div');
+                combinationElement.classList.add('number-combination');
+
+                // Create radio button
+                const radioContainer = document.createElement('div');
+                radioContainer.className = 'radio-container';
+                const radioButton = document.createElement('input');
+                radioButton.type = 'radio';
+                radioButton.name = 'answer';
+                radioButton.value = number;
+                radioContainer.appendChild(radioButton);
+
+                // Create number boxes
+                for (let i = 0; i < number.length; i++) {
+                    const numberBox = document.createElement('div');
+                    numberBox.classList.add('number-box');
+                    numberBox.textContent = number[i];
+                    combinationElement.appendChild(numberBox);
+                }
+
+                combinationElement.prepend(radioContainer);
+                numberList.appendChild(combinationElement);
             });
-            questionContainer.appendChild(checkboxContainer);
+        } else if (questions[currentQuestionIndex].type === "multiple") {
+            allNumbers.forEach(number => {
+                const combinationElement = document.createElement('div');
+                combinationElement.classList.add('number-combination');
+
+                // Create checkbox
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = number;
+                checkboxContainer.appendChild(checkbox);
+
+                // Create number boxes
+                for (let i = 0; i < number.length; i++) {
+                    const numberBox = document.createElement('div');
+                    numberBox.classList.add('number-box');
+                    numberBox.textContent = number[i];
+                    combinationElement.appendChild(numberBox);
+                }
+
+                combinationElement.prepend(checkboxContainer);
+                numberList.appendChild(combinationElement);
+            });
         }
 
         const submitButton = document.createElement('button');
         submitButton.textContent = 'Submit Answer';
         submitButton.id = 'submitAnswer';
         submitButton.addEventListener('click', checkAnswer);
-        questionContainer.appendChild(submitButton);
+        numberList.appendChild(submitButton);
     } else {
         showFinalScore();
     }
@@ -153,10 +239,11 @@ function showNextQuestion() {
 
 function checkAnswer() {
     let answer;
-    if (questions[currentQuestionIndex].type === "text") {
-        answer = parseInt(document.getElementById('currentAnswer').value);
-    } else if (questions[currentQuestionIndex].type === "checkbox") {
-        answer = Array.from(document.querySelectorAll('#checkboxContainer input:checked'))
+    if (questions[currentQuestionIndex].type === "single") {
+        const selectedRadio = document.querySelector('input[name="answer"]:checked');
+        answer = selectedRadio ? parseInt(selectedRadio.value) : null;
+    } else if (questions[currentQuestionIndex].type === "multiple") {
+        answer = Array.from(document.querySelectorAll('#numberList input:checked'))
             .map(checkbox => parseInt(checkbox.value));
     }
     userAnswers.push(answer);
@@ -169,23 +256,24 @@ function showFinalScore() {
     const correctAnswers = [
         Math.max(...allNumbers),
         Math.min(...allNumbers),
-        allNumbers.filter(num => num > 400)
+        allNumbers.filter(num => num < 400),
+        allNumbers.filter(num => num > 400),
     ];
 
     let score = 0;
     userAnswers.forEach((answer, index) => {
-        if (questions[index].type === "text") {
+        if (questions[index].type === "single") {
             if (answer === correctAnswers[index]) score++;
-        } else if (questions[index].type === "checkbox") {
+        } else if (questions[index].type === "multiple") {
             if (JSON.stringify(answer.sort()) === JSON.stringify(correctAnswers[index].sort())) score++;
         }
     });
 
     const questionContainer = document.getElementById('questionContainer');
     questionContainer.innerHTML = `
-                <h2>Quiz Completed!</h2>
-                <p>You scored ${score} out of ${questions.length}!</p>
-            `;
+        <h2>Quiz Completed!</h2>
+        <p>You scored ${score} out of ${questions.length}!</p>
+    `;
 }
 
-initializeButtons();
+createPageStructure();
