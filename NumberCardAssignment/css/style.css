@@ -125,6 +125,8 @@ h2 {
     border-radius: 5px;
     cursor: pointer;
     display: block;
+    width: 40%;
+    margin: 10px 0 0 0;
 }
 
 .checkbox-container {

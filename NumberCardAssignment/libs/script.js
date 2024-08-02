@@ -1,9 +1,10 @@
 const numberOfCards = 3;
 const valueOfCards = [7, 4, 2];
 const questions = [
-    { type: "text", question: "What is the largest number of all?" },
-    { type: "text", question: "What is the smallest number of all?" },
-    { type: "checkbox", question: "Select all numbers greater than 400" }
+    { type: "single", question: "What is the largest number of all?" },
+    { type: "single", question: "What is the smallest number of all?" },
+    { type: "multiple", question: "Select all numbers smaller than 400" },
+    { type: "multiple", question: "Select all numbers greater than 400" },
 ];
 
 let currentNumber = '';
@@ -14,6 +15,60 @@ let currentQuestionIndex = 0;
 
 function factorial(n) {
     return (n <= 1) ? 1 : n * factorial(n - 1);
+}
+
+// Create the main structure of the page
+function createPageStructure() {
+    const container = document.createElement('div');
+    container.classList.add('container');
+
+    const leftPanel = document.createElement('div');
+    leftPanel.classList.add('left-panel');
+
+    const rightPanel = document.createElement('div');
+    rightPanel.classList.add('right-panel');
+
+    const leftPanelHeading = document.createElement('h2');
+    leftPanelHeading.textContent = 'Shown below are few Number Cards';
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('button-container');
+    buttonContainer.id = 'buttonContainer';
+
+    const currentNumberDiv = document.createElement('div');
+    currentNumberDiv.id = 'currentNumber';
+
+    const questionContainer = document.createElement('div');
+    questionContainer.id = 'questionContainer';
+    questionContainer.style.display = 'none';
+
+    const rightPanelHeading = document.createElement('h2');
+    rightPanelHeading.textContent = 'Number List';
+
+    const numberList = document.createElement('div');
+    numberList.classList.add('number-list');
+    numberList.id = 'numberList';
+
+    const popup = document.createElement('div');
+    popup.classList.add('popup');
+    popup.id = 'popup';
+    popup.innerHTML = '<p>This combination has already been used!</p>';
+
+    leftPanel.appendChild(leftPanelHeading);
+    leftPanel.appendChild(buttonContainer);
+    leftPanel.appendChild(currentNumberDiv);
+    leftPanel.appendChild(questionContainer);
+
+    rightPanel.appendChild(rightPanelHeading);
+    rightPanel.appendChild(numberList);
+
+    container.appendChild(leftPanel);
+    container.appendChild(rightPanel);
+
+    document.body.appendChild(container);
+    document.body.appendChild(popup);
+
+    initializeButtons();
 }
 
 function initializeButtons() {
@@ -121,7 +176,7 @@ function showNextQuestion() {
         const allNumbers = Array.from(usedCombinations).map(String);
         numberList.innerHTML = ''; // Clear previous inputs
 
-        if (questions[currentQuestionIndex].type === "text") {
+        if (questions[currentQuestionIndex].type === "single") {
             allNumbers.forEach(number => {
                 const combinationElement = document.createElement('div');
                 combinationElement.classList.add('number-combination');
@@ -146,7 +201,7 @@ function showNextQuestion() {
                 combinationElement.prepend(radioContainer);
                 numberList.appendChild(combinationElement);
             });
-        } else if (questions[currentQuestionIndex].type === "checkbox") {
+        } else if (questions[currentQuestionIndex].type === "multiple") {
             allNumbers.forEach(number => {
                 const combinationElement = document.createElement('div');
                 combinationElement.classList.add('number-combination');
@@ -175,8 +230,6 @@ function showNextQuestion() {
         const submitButton = document.createElement('button');
         submitButton.textContent = 'Submit Answer';
         submitButton.id = 'submitAnswer';
-        submitButton.style.width = '50%';
-        submitButton.style.margin = '10px 0 0 0';
         submitButton.addEventListener('click', checkAnswer);
         numberList.appendChild(submitButton);
     } else {
@@ -186,10 +239,10 @@ function showNextQuestion() {
 
 function checkAnswer() {
     let answer;
-    if (questions[currentQuestionIndex].type === "text") {
+    if (questions[currentQuestionIndex].type === "single") {
         const selectedRadio = document.querySelector('input[name="answer"]:checked');
         answer = selectedRadio ? parseInt(selectedRadio.value) : null;
-    } else if (questions[currentQuestionIndex].type === "checkbox") {
+    } else if (questions[currentQuestionIndex].type === "multiple") {
         answer = Array.from(document.querySelectorAll('#numberList input:checked'))
             .map(checkbox => parseInt(checkbox.value));
     }
@@ -203,14 +256,15 @@ function showFinalScore() {
     const correctAnswers = [
         Math.max(...allNumbers),
         Math.min(...allNumbers),
-        allNumbers.filter(num => num > 400)
+        allNumbers.filter(num => num < 400),
+        allNumbers.filter(num => num > 400),
     ];
 
     let score = 0;
     userAnswers.forEach((answer, index) => {
-        if (questions[index].type === "text") {
+        if (questions[index].type === "single") {
             if (answer === correctAnswers[index]) score++;
-        } else if (questions[index].type === "checkbox") {
+        } else if (questions[index].type === "multiple") {
             if (JSON.stringify(answer.sort()) === JSON.stringify(correctAnswers[index].sort())) score++;
         }
     });
@@ -222,4 +276,4 @@ function showFinalScore() {
     `;
 }
 
-initializeButtons();
+createPageStructure();
