@@ -12,6 +12,7 @@ let usedCombinations = new Set();
 const totalPossibleCombinations = factorial(numberOfCards);
 let userAnswers = [];
 let currentQuestionIndex = 0;
+let demoMode = false; // Flag to track demo mode
 
 function factorial(n) {
     return (n <= 1) ? 1 : n * factorial(n - 1);
@@ -52,7 +53,7 @@ function createPageStructure() {
     const popup = document.createElement('div');
     popup.classList.add('popup');
     popup.id = 'popup';
-    popup.innerHTML = '<p>This combination has already been used!</p>';
+    popup.innerHTML = '<p><b>This combination has already been used!</b></p>';
 
     leftPanel.appendChild(leftPanelHeading);
     leftPanel.appendChild(buttonContainer);
@@ -68,7 +69,32 @@ function createPageStructure() {
     document.body.appendChild(container);
     document.body.appendChild(popup);
 
+    const demoPopup = document.createElement('div');
+    demoPopup.id = 'demoPopup';
+    demoPopup.classList.add('demo-popup');
+    demoPopup.innerHTML = `
+        <div class="demo-popup-content">
+            <h3>Do you want a demo?</h3>
+            <div class="demo-buttons">
+                <button id="demoYes" class="demo-btn">Yes</button>
+                <button id="demoNo" class="demo-btn">No</button>
+            </div>
+        </div>
+    `;
+
+    const demoArrow = document.createElement('div');
+    demoArrow.id = 'demoArrow';
+    demoArrow.classList.add('demo-arrow');
+    demoArrow.innerHTML = `
+        <div class="arrow-up"></div>
+        <div class="click-here">Click here</div>
+    `;
+
+    document.body.appendChild(demoPopup);
+    document.body.appendChild(demoArrow);
+
     initializeButtons();
+    showDemoPopup();
 }
 
 function initializeButtons() {
@@ -88,6 +114,7 @@ function selectNumber(value, button) {
         button.disabled = true;
         button.style.backgroundColor = '#f1c40f';
         updateCurrentNumber();
+        document.getElementById('demoArrow').style.display = 'none';
         if (currentNumber.length === numberOfCards) {
             setTimeout(() => {
                 checkCombination();
@@ -109,6 +136,7 @@ function checkCombination() {
     } else {
         usedCombinations.add(currentNumber);
         displayCombination();
+        demoMode = false;
     }
     resetSelection();
     if (usedCombinations.size === totalPossibleCombinations) {
@@ -129,6 +157,12 @@ function displayCombination() {
     }
 
     numberList.appendChild(combinationElement);
+
+    if (demoMode) {
+        setTimeout(() => {
+            showDemoOverPopup();
+        }, 300); // Wait for the pop up duration to finish
+    }
 }
 
 function resetSelection() {
@@ -275,5 +309,88 @@ function showFinalScore() {
         <p>You scored ${score} out of ${questions.length}!</p>
     `;
 }
+
+function showDemoPopup() {
+    const demoPopup = document.getElementById('demoPopup');
+    demoPopup.style.display = 'flex';
+
+    document.getElementById('demoYes').addEventListener('click', startDemo);
+    document.getElementById('demoNo').addEventListener('click', () => {
+        demoPopup.style.display = 'none';
+    });
+}
+
+function startDemo() {
+    demoMode = true; // Set demo mode flag to true
+    document.getElementById('demoPopup').style.display = 'none';
+    showDemoArrow(0);
+}
+
+function showDemoArrow(index) {
+    if (index >= valueOfCards.length) {
+        document.getElementById('demoArrow').style.display = 'none';
+        return;
+    }
+
+    const buttons = document.querySelectorAll('.number-button');
+    const button = buttons[index];
+    const arrow = document.getElementById('demoArrow');
+
+    const buttonRect = button.getBoundingClientRect();
+    arrow.style.left = `${buttonRect.left + buttonRect.width / 2 - 30}px`; // Center the arrow
+    arrow.style.top = `${buttonRect.bottom + 10}px`; // Position below the button
+    arrow.style.display = 'block';
+
+    button.addEventListener('click', () => showDemoArrow(index + 1), { once: true });
+}
+
+// Add this function to show the demo over popup
+function showDemoOverPopup() {
+    const demoOverPopup = document.createElement('div');
+    demoOverPopup.id = 'demoOverPopup';
+    demoOverPopup.classList.add('demo-popup');
+    demoOverPopup.innerHTML = `
+        <div class="demo-popup-content">
+            <h4>Your Number is Generated</h4>
+            <h3>Do you want to see it again?</h3>
+            <div class="demo-buttons">
+                <button id="demoOverYes" class="demo-btn">Yes</button>
+                <button id="demoOverNo" class="demo-btn">No</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(demoOverPopup);
+
+    function resetAndClear() {
+        // Reset the current number
+        currentNumber = '';
+        updateCurrentNumber();
+
+        // Clear the number list
+        document.getElementById('numberList').innerHTML = "";
+
+        // Clear used combinations
+        usedCombinations.clear();
+
+        // Reset all buttons
+        document.querySelectorAll('.number-button').forEach(button => {
+            button.disabled = false;
+            button.style.backgroundColor = '#3498db';
+        });
+    }
+
+    document.getElementById('demoOverYes').addEventListener('click', () => {
+        document.body.removeChild(demoOverPopup);
+        resetAndClear();
+        startDemo();
+    });
+
+    document.getElementById('demoOverNo').addEventListener('click', () => {
+        document.body.removeChild(demoOverPopup);
+        // resetAndClear();
+        demoMode = false;
+    });
+}
+
 
 createPageStructure();
