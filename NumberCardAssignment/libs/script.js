@@ -42,6 +42,7 @@ function createPageStructure() {
     const questionContainer = document.createElement('div');
     questionContainer.id = 'questionContainer';
     questionContainer.style.display = 'none';
+    questionContainer.classList.add('question-container'); // Added class for styling
 
     const rightPanelHeading = document.createElement('h2');
     rightPanelHeading.textContent = 'Number List';
@@ -103,6 +104,7 @@ function initializeButtons() {
         const button = document.createElement('button');
         button.textContent = value;
         button.classList.add('number-button');
+        button.disabled = demoMode; // Disable all buttons initially if demo mode is on
         button.addEventListener('click', () => selectNumber(value, button));
         buttonContainer.appendChild(button);
     });
@@ -169,7 +171,7 @@ function resetSelection() {
     currentNumber = '';
     updateCurrentNumber();
     document.querySelectorAll('.number-button').forEach(button => {
-        button.disabled = false;
+        button.disabled = demoMode; // Disable all buttons if demo mode is active
         button.style.backgroundColor = '#3498db';
     });
 }
@@ -203,7 +205,7 @@ function showNextQuestion() {
     if (currentQuestionIndex < questions.length) {
         const questionElement = document.createElement('div');
         questionElement.classList.add('question');
-        questionElement.innerHTML = `<p>${questions[currentQuestionIndex].question}</p>`;
+        questionElement.innerHTML = `<p class="animated-question">${questions[currentQuestionIndex].question}</p>`; // Added class for animation
         questionContainer.appendChild(questionElement);
 
         const numberList = document.getElementById('numberList');
@@ -303,11 +305,31 @@ function showFinalScore() {
         }
     });
 
-    const questionContainer = document.getElementById('questionContainer');
-    questionContainer.innerHTML = `
-        <h2>Quiz Completed!</h2>
-        <p>You scored ${score} out of ${questions.length}!</p>
+    const finalScorePopup = document.createElement('div');
+    finalScorePopup.id = 'finalScorePopup';
+    finalScorePopup.classList.add('popup');
+    finalScorePopup.innerHTML = `
+        <p><b>Quiz Completed! You scored ${score} out of ${questions.length}!</b></p>
+        <button onclick="window.location.reload();" class="demo-btn">OK</button>
     `;
+    document.body.appendChild(finalScorePopup);
+    finalScorePopup.style.display = 'block';
+
+    // Dim the background
+    document.body.style.backgroundColor = 'rgba(0,0,0,0.5)';
+
+    // Disable all other elements
+    document.querySelectorAll('*').forEach(el => {
+        if (!el.classList.contains('popup')) {
+            el.style.pointerEvents = 'none';
+        }
+    });
+
+    // Enable popup and its elements
+    finalScorePopup.style.pointerEvents = 'auto';
+    finalScorePopup.querySelectorAll('*').forEach(el => {
+        el.style.pointerEvents = 'auto';
+    });
 }
 
 function showDemoPopup() {
@@ -333,8 +355,12 @@ function showDemoArrow(index) {
     }
 
     const buttons = document.querySelectorAll('.number-button');
+    buttons.forEach((button, idx) => {
+        button.disabled = idx !== index; // Enable only the button at the current index
+        button.style.backgroundColor = idx === index ? '#3498db' : '#f1c40f'; // Highlight the active button
+    });
     const button = buttons[index];
-    const arrow = document.getElementById('demoArrow');
+    arrow = document.getElementById('demoArrow');
 
     const buttonRect = button.getBoundingClientRect();
     arrow.style.left = `${buttonRect.left + buttonRect.width / 2 - 30}px`; // Center the arrow
@@ -394,3 +420,7 @@ function showDemoOverPopup() {
 
 
 createPageStructure();
+
+
+
+
