@@ -16,7 +16,7 @@ function factorial(n) {
 }
 
 // Class to handle the game logic and UI
-class NumberCombinationGame {
+class NumberCombinationInteractive {
     constructor() {
         this.initializeDynamicNumbers();
         this.initializeQuestions();
@@ -428,4 +428,4 @@ class NumberCombinationGame {
 }
 
 // Initialize the game
-new NumberCombinationGame();
+new NumberCombinationInteractive();
