@@ -106,11 +106,20 @@ h2 {
 
 .question-container {
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .question {
     margin-bottom: 10px;
     font-size: 20px;
+    animation: fadeIn 1s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .answer-input {
@@ -243,4 +252,8 @@ h2 {
 
 .demo-popup-content h4{
     color: red;
+}
+
+.demo-btn{
+    background-color: #3498db;
 }
