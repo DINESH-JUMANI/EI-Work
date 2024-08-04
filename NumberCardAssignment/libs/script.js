@@ -1,10 +1,11 @@
 const numberOfCards = 3;
 const valueOfCards = [7, 4, 2];
+const dynamicNumbers = [generateDynamicNumber(), generateDynamicNumber()];
 const questions = [
     { type: "single", question: "What is the largest number of all?" },
     { type: "single", question: "What is the smallest number of all?" },
-    { type: "multiple", question: "Select all numbers smaller than 400" },
-    { type: "multiple", question: "Select all numbers greater than 400" },
+    { type: "multiple", question: `Select all numbers smaller than ${dynamicNumbers[0]}` },
+    { type: "multiple", question: `Select all numbers greater than ${dynamicNumbers[1]}` },
 ];
 
 let currentNumber = '';
@@ -16,6 +17,12 @@ let demoMode = false; // Flag to track demo mode
 
 function factorial(n) {
     return (n <= 1) ? 1 : n * factorial(n - 1);
+}
+function generateDynamicNumber() {
+    const minValue = Math.min(...valueOfCards);
+    const maxValue = Math.max(...valueOfCards);
+    const randomSmallNumber = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
+    return randomSmallNumber * Math.pow(10, numberOfCards - 1);
 }
 
 // Create the main structure of the page
@@ -56,19 +63,10 @@ function createPageStructure() {
     popup.id = 'popup';
     popup.innerHTML = '<p><b>This combination has already been used!</b></p>';
 
-    leftPanel.appendChild(leftPanelHeading);
-    leftPanel.appendChild(buttonContainer);
-    leftPanel.appendChild(currentNumberDiv);
-    leftPanel.appendChild(questionContainer);
-
-    rightPanel.appendChild(rightPanelHeading);
-    rightPanel.appendChild(numberList);
-
-    container.appendChild(leftPanel);
-    container.appendChild(rightPanel);
-
-    document.body.appendChild(container);
-    document.body.appendChild(popup);
+    leftPanel.append(leftPanelHeading, buttonContainer, currentNumberDiv, questionContainer);
+    rightPanel.append(rightPanelHeading, numberList);
+    container.append(leftPanel, rightPanel);
+    document.body.append(container, popup);
 
     const demoPopup = document.createElement('div');
     demoPopup.id = 'demoPopup';
@@ -91,9 +89,7 @@ function createPageStructure() {
         <div class="click-here">Click here</div>
     `;
 
-    document.body.appendChild(demoPopup);
-    document.body.appendChild(demoArrow);
-
+    document.body.append(demoPopup, demoArrow);
     initializeButtons();
     showDemoPopup();
 }
@@ -118,9 +114,7 @@ function selectNumber(value, button) {
         updateCurrentNumber();
         document.getElementById('demoArrow').style.display = 'none';
         if (currentNumber.length === numberOfCards) {
-            setTimeout(() => {
-                checkCombination();
-            }, 100);
+            setTimeout(checkCombination, 100);
         }
     }
 }
@@ -151,19 +145,17 @@ function displayCombination() {
     const combinationElement = document.createElement('div');
     combinationElement.classList.add('number-combination');
 
-    for (let i = 0; i < currentNumber.length; i++) {
+    currentNumber.split('').forEach(num => {
         const numberBox = document.createElement('div');
         numberBox.classList.add('number-box');
-        numberBox.textContent = currentNumber[i];
+        numberBox.textContent = num;
         combinationElement.appendChild(numberBox);
-    }
+    });
 
     numberList.appendChild(combinationElement);
 
     if (demoMode) {
-        setTimeout(() => {
-            showDemoOverPopup();
-        }, 300); // Wait for the pop up duration to finish
+        setTimeout(showDemoOverPopup, 300); // Wait for the pop up duration to finish
     }
 }
 
@@ -212,56 +204,28 @@ function showNextQuestion() {
         const allNumbers = Array.from(usedCombinations).map(String);
         numberList.innerHTML = ''; // Clear previous inputs
 
-        if (questions[currentQuestionIndex].type === "single") {
-            allNumbers.forEach(number => {
-                const combinationElement = document.createElement('div');
-                combinationElement.classList.add('number-combination');
+        allNumbers.forEach(number => {
+            const combinationElement = document.createElement('div');
+            combinationElement.classList.add('number-combination');
 
-                // Create radio button
-                const radioContainer = document.createElement('div');
-                radioContainer.className = 'radio-container';
-                const radioButton = document.createElement('input');
-                radioButton.type = 'radio';
-                radioButton.name = 'answer';
-                radioButton.value = number;
-                radioContainer.appendChild(radioButton);
+            const inputContainer = document.createElement('div');
+            inputContainer.className = questions[currentQuestionIndex].type === "single" ? 'radio-container' : 'checkbox-container';
+            const input = document.createElement('input');
+            input.type = questions[currentQuestionIndex].type === "single" ? 'radio' : 'checkbox';
+            input.name = questions[currentQuestionIndex].type === "single" ? 'answer' : '';
+            input.value = number;
+            inputContainer.appendChild(input);
 
-                // Create number boxes
-                for (let i = 0; i < number.length; i++) {
-                    const numberBox = document.createElement('div');
-                    numberBox.classList.add('number-box');
-                    numberBox.textContent = number[i];
-                    combinationElement.appendChild(numberBox);
-                }
-
-                combinationElement.prepend(radioContainer);
-                numberList.appendChild(combinationElement);
+            number.split('').forEach(num => {
+                const numberBox = document.createElement('div');
+                numberBox.classList.add('number-box');
+                numberBox.textContent = num;
+                combinationElement.appendChild(numberBox);
             });
-        } else if (questions[currentQuestionIndex].type === "multiple") {
-            allNumbers.forEach(number => {
-                const combinationElement = document.createElement('div');
-                combinationElement.classList.add('number-combination');
 
-                // Create checkbox
-                const checkboxContainer = document.createElement('div');
-                checkboxContainer.className = 'checkbox-container';
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = number;
-                checkboxContainer.appendChild(checkbox);
-
-                // Create number boxes
-                for (let i = 0; i < number.length; i++) {
-                    const numberBox = document.createElement('div');
-                    numberBox.classList.add('number-box');
-                    numberBox.textContent = number[i];
-                    combinationElement.appendChild(numberBox);
-                }
-
-                combinationElement.prepend(checkboxContainer);
-                numberList.appendChild(combinationElement);
-            });
-        }
+            combinationElement.prepend(inputContainer);
+            numberList.appendChild(combinationElement);
+        });
 
         const submitButton = document.createElement('button');
         submitButton.textContent = 'Submit Answer';
@@ -278,7 +242,7 @@ function checkAnswer() {
     if (questions[currentQuestionIndex].type === "single") {
         const selectedRadio = document.querySelector('input[name="answer"]:checked');
         answer = selectedRadio ? parseInt(selectedRadio.value) : null;
-    } else if (questions[currentQuestionIndex].type === "multiple") {
+    } else {
         answer = Array.from(document.querySelectorAll('#numberList input:checked'))
             .map(checkbox => parseInt(checkbox.value));
     }
@@ -292,17 +256,15 @@ function showFinalScore() {
     const correctAnswers = [
         Math.max(...allNumbers),
         Math.min(...allNumbers),
-        allNumbers.filter(num => num < 400),
-        allNumbers.filter(num => num > 400),
+        allNumbers.filter(num => num < dynamicNumbers[0]),
+        allNumbers.filter(num => num > dynamicNumbers[1]),
     ];
 
     let score = 0;
     userAnswers.forEach((answer, index) => {
         if (questions[index].type === "single") {
             if (answer === correctAnswers[index]) score++;
-        } else if (questions[index].type === "multiple") {
-            if (JSON.stringify(answer.sort()) === JSON.stringify(correctAnswers[index].sort())) score++;
-        }
+        } else if (JSON.stringify(answer.sort()) === JSON.stringify(correctAnswers[index].sort())) score++;
     });
 
     const finalScorePopup = document.createElement('div');
@@ -360,7 +322,7 @@ function showDemoArrow(index) {
         button.style.backgroundColor = idx === index ? '#3498db' : '#f1c40f'; // Highlight the active button
     });
     const button = buttons[index];
-    arrow = document.getElementById('demoArrow');
+    const arrow = document.getElementById('demoArrow');
 
     const buttonRect = button.getBoundingClientRect();
     arrow.style.left = `${buttonRect.left + buttonRect.width / 2 - 30}px`; // Center the arrow
@@ -413,14 +375,8 @@ function showDemoOverPopup() {
 
     document.getElementById('demoOverNo').addEventListener('click', () => {
         document.body.removeChild(demoOverPopup);
-        // resetAndClear();
         demoMode = false;
     });
 }
 
-
 createPageStructure();
-
-
-
-
