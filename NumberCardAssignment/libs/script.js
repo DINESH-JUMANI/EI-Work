@@ -40,8 +40,8 @@ class NumberCombinationInteractive {
 
     // Generate a random dynamic number
     generateDynamicNumber() {
-        const minValue = Math.min(...valueOfCards);
-        const maxValue = Math.max(...valueOfCards);
+        const minValue = Math.min(...valueOfCards)+1;
+        const maxValue = Math.max(...valueOfCards)-1;
         const randomSmallNumber = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         return randomSmallNumber * Math.pow(10, numberOfCards - 1);
     }
