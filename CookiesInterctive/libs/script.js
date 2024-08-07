@@ -1,431 +1,118 @@
-// Global variables
-const numberOfCards = 3;
-const valueOfCards = [7, 4, 2];
-let dynamicNumbers = [];
-let questions = [];
-let currentNumber = '';
-let usedCombinations = new Set();
-const totalPossibleCombinations = factorial(numberOfCards);
-let userAnswers = [];
-let currentQuestionIndex = 0;
-let demoMode = false; // Flag to track demo mode
+// ?numbers=60|40&objects%20=%20cookies|chocolate,%20oatmeal&showAnswer=1&answer=20
 
-// Utility function to calculate factorial
-function factorial(n) {
-    return (n <= 1) ? 1 : n * factorial(n - 1);
-}
 
-// Class to handle the game logic and UI
-class NumberCombinationInteractive {
-    constructor() {
-        this.initializeDynamicNumbers();
-        this.initializeQuestions();
-        this.createPageStructure();
+document.addEventListener("DOMContentLoaded", function () {
+    document.body.innerHTML = `
+    <div class="container">
+        <div class="instructionBox">
+            <div class="instruction">Guess the number of cookies in each row at the bakery.</div>
+            <div class="instruction"><i>Press the "Check" button.</i></div>
+        </div>
+        <input type="number" id="inputNumber" placeholder="Enter a number">
+        <button id="checkButton" onclick="checkGuess()">Check</button>
+        <div id="chocolateRow">
+            <div class="instruction">Chocolate Chip Cookies:</div>
+            <div id="chocolateCookies"></div>
+            <span id="chocolateLeft" class="error"></span>
+        </div>
+        <div id="oatmealRow">
+            <div class="instruction">Oatmeal Raisin Cookies:</div>
+            <div id="oatmealCookies"></div>
+            <span id="oatmealLeft" class="error"></span>
+        </div>
+        <br>
+        <div id="message" class="error"></div>
+    </div>
+    `;
+
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     }
 
-    // Generate dynamic numbers for the questions
-    initializeDynamicNumbers() {
-        dynamicNumbers = [this.generateDynamicNumber(), this.generateDynamicNumber()];
-    }
+    // Extract numbers from URL parameter
+    var numbersParam = getUrlParameter('numbers');
+    var numbers = numbersParam.split('|').map(Number);
+    var chocolateCount = numbers[0];
+    var oatmealCount = numbers[1];
+    var showAnswer = getUrlParameter('showAnswer');
+    var answer = getUrlParameter('answer') ? getUrlParameter('answer') : 0;
 
-    // Create questions based on dynamic numbers
-    initializeQuestions() {
-        questions = [
-            { type: "single", question: "What is the largest number of all?" },
-            { type: "single", question: "What is the smallest number of all?" },
-            { type: "multiple", question: `Select all numbers smaller than ${dynamicNumbers[0]}` },
-            { type: "multiple", question: `Select all numbers greater than ${dynamicNumbers[1]}` },
-        ];
-    }
+    window.checkGuess = function () {
+        var x = parseInt(document.getElementById("inputNumber").value);
+        var chocolateDiv = document.getElementById("chocolateCookies");
+        var oatmealDiv = document.getElementById("oatmealCookies");
+        var chocolateLeftSpan = document.getElementById("chocolateLeft");
+        var oatmealLeftSpan = document.getElementById("oatmealLeft");
+        var messageDiv = document.getElementById("message");
 
-    // Generate a random dynamic number
-    generateDynamicNumber() {
-        const minValue = Math.min(...valueOfCards)+1;
-        const maxValue = Math.max(...valueOfCards)-1;
-        const randomSmallNumber = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
-        return randomSmallNumber * Math.pow(10, numberOfCards - 1);
-    }
-
-    // Create the main structure of the page
-    createPageStructure() {
-        const container = document.createElement('div');
-        container.classList.add('container');
-
-        const leftPanel = document.createElement('div');
-        leftPanel.classList.add('left-panel');
-
-        const rightPanel = document.createElement('div');
-        rightPanel.classList.add('right-panel');
-
-        const leftPanelHeading = document.createElement('h2');
-        leftPanelHeading.textContent = 'Shown below are few Number Cards';
-
-        const buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('button-container');
-        buttonContainer.id = 'buttonContainer';
-
-        const currentNumberDiv = document.createElement('div');
-        currentNumberDiv.id = 'currentNumber';
-
-        const questionContainer = document.createElement('div');
-        questionContainer.id = 'questionContainer';
-        questionContainer.style.display = 'none';
-        questionContainer.classList.add('question-container'); // Added class for styling
-
-        const rightPanelHeading = document.createElement('h2');
-        rightPanelHeading.textContent = 'Number List';
-
-        const numberList = document.createElement('div');
-        numberList.classList.add('number-list');
-        numberList.id = 'numberList';
-
-        const popup = document.createElement('div');
-        popup.classList.add('popup');
-        popup.id = 'popup';
-        popup.innerHTML = '<p><b>This combination has already been used!</b></p>';
-
-        leftPanel.append(leftPanelHeading, buttonContainer, currentNumberDiv, questionContainer);
-        rightPanel.append(rightPanelHeading, numberList);
-        container.append(leftPanel, rightPanel);
-        document.body.append(container, popup);
-
-        const demoPopup = this.createDemoPopup();
-        const demoArrow = this.createDemoArrow();
-
-        document.body.append(demoPopup, demoArrow);
-        this.initializeButtons();
-        this.showDemoPopup();
-    }
-
-    // Create demo popup
-    createDemoPopup() {
-        const demoPopup = document.createElement('div');
-        demoPopup.id = 'demoPopup';
-        demoPopup.classList.add('demo-popup');
-        demoPopup.innerHTML = `
-            <div class="demo-popup-content">
-                <h3>Do you want a demo?</h3>
-                <div class="demo-buttons">
-                    <button id="demoYes" class="demo-btn">Yes</button>
-                    <button id="demoNo" class="demo-btn">No</button>
-                </div>
-            </div>
-        `;
-        return demoPopup;
-    }
-
-    // Create demo arrow
-    createDemoArrow() {
-        const demoArrow = document.createElement('div');
-        demoArrow.id = 'demoArrow';
-        demoArrow.classList.add('demo-arrow');
-        demoArrow.innerHTML = `
-            <div class="arrow-up"></div>
-            <div class="click-here">Click here</div>
-        `;
-        return demoArrow;
-    }
-
-    // Initialize buttons for number selection
-    initializeButtons() {
-        const buttonContainer = document.getElementById('buttonContainer');
-        valueOfCards.forEach(value => {
-            const button = document.createElement('button');
-            button.textContent = value;
-            button.classList.add('number-button');
-            button.disabled = demoMode; // Disable all buttons initially if demo mode is on
-            button.addEventListener('click', () => this.selectNumber(value, button));
-            buttonContainer.appendChild(button);
-        });
-    }
-
-    // Handle number selection
-    selectNumber(value, button) {
-        if (currentNumber.length < numberOfCards) {
-            currentNumber += value;
-            button.disabled = true;
-            button.style.backgroundColor = '#f1c40f';
-            this.updateCurrentNumber();
-            document.getElementById('demoArrow').style.display = 'none';
-            if (currentNumber.length === numberOfCards) {
-                setTimeout(() => this.checkCombination(), 100);
-            }
-        }
-    }
-
-    // Update the displayed current number
-    updateCurrentNumber() {
-        const currentNumberBoxes = document.querySelectorAll('.current-number-box');
-        currentNumberBoxes.forEach((box, index) => {
-            box.textContent = currentNumber[index] || '';
-        });
-    }
-
-    // Check if the current number combination is valid
-    checkCombination() {
-        if (usedCombinations.has(currentNumber)) {
-            this.showPopup();
-        } else {
-            usedCombinations.add(currentNumber);
-            this.displayCombination();
-            demoMode = false;
-        }
-        this.resetSelection();
-        if (usedCombinations.size === totalPossibleCombinations) {
-            this.showQuestions();
-        }
-    }
-
-    // Display the selected number combination
-    displayCombination() {
-        const numberList = document.getElementById('numberList');
-        const combinationElement = document.createElement('div');
-        combinationElement.classList.add('number-combination');
-
-        currentNumber.split('').forEach(num => {
-            const numberBox = document.createElement('div');
-            numberBox.classList.add('number-box');
-            numberBox.textContent = num;
-            combinationElement.appendChild(numberBox);
-        });
-
-        numberList.appendChild(combinationElement);
-
-        if (demoMode) {
-            setTimeout(() => this.showDemoOverPopup(), 300); // Wait for the pop up duration to finish
-        }
-    }
-
-    // Reset the selection for the next round
-    resetSelection() {
-        currentNumber = '';
-        this.updateCurrentNumber();
-        document.querySelectorAll('.number-button').forEach(button => {
-            button.disabled = demoMode; // Disable all buttons if demo mode is active
-            button.style.backgroundColor = '#3498db';
-        });
-    }
-
-    // Show a popup message
-    showPopup() {
-        const popup = document.getElementById('popup');
-        popup.style.display = 'block';
-        setTimeout(() => {
-            popup.style.display = 'none';
-        }, 2000);
-    }
-
-    // Show the question section
-    showQuestions() {
-        const currentNumberElement = document.getElementById('currentNumber');
-        const questionContainer = document.getElementById('questionContainer');
-        currentNumberElement.style.display = 'none';
-        questionContainer.style.display = 'block';
-
-        document.querySelectorAll('.number-button').forEach(button => {
-            button.disabled = true;
-            button.style.backgroundColor = '#f1c40f';
-        });
-
-        this.showNextQuestion();
-    }
-
-    // Display the next question
-    showNextQuestion() {
-        const questionContainer = document.getElementById('questionContainer');
-        questionContainer.innerHTML = '';
-
-        if (currentQuestionIndex < questions.length) {
-            const questionElement = document.createElement('div');
-            questionElement.classList.add('question');
-            questionElement.innerHTML = `<p class="animated-question">${questions[currentQuestionIndex].question}</p>`; // Added class for animation
-            questionContainer.appendChild(questionElement);
-
-            const numberList = document.getElementById('numberList');
-            const allNumbers = Array.from(usedCombinations).map(String);
-            numberList.innerHTML = ''; // Clear previous inputs
-
-            allNumbers.forEach(number => {
-                const combinationElement = document.createElement('div');
-                combinationElement.classList.add('number-combination');
-
-                const inputContainer = document.createElement('div');
-                inputContainer.className = questions[currentQuestionIndex].type === "single" ? 'radio-container' : 'checkbox-container';
-                const input = document.createElement('input');
-                input.type = questions[currentQuestionIndex].type === "single" ? 'radio' : 'checkbox';
-                input.name = questions[currentQuestionIndex].type === "single" ? 'answer' : '';
-                input.value = number;
-                inputContainer.appendChild(input);
-
-                number.split('').forEach(num => {
-                    const numberBox = document.createElement('div');
-                    numberBox.classList.add('number-box');
-                    numberBox.textContent = num;
-                    combinationElement.appendChild(numberBox);
-                });
-
-                combinationElement.prepend(inputContainer);
-                numberList.appendChild(combinationElement);
-            });
-
-            const submitButton = document.createElement('button');
-            submitButton.textContent = 'Submit Answer';
-            submitButton.id = 'submitAnswer';
-            submitButton.addEventListener('click', () => this.checkAnswer());
-            numberList.appendChild(submitButton);
-        } else {
-            this.showFinalScore();
-        }
-    }
-
-    // Check the user's answer
-    checkAnswer() {
-        let answer;
-        if (questions[currentQuestionIndex].type === "single") {
-            const selectedRadio = document.querySelector('input[name="answer"]:checked');
-            answer = selectedRadio ? parseInt(selectedRadio.value) : null;
-        } else {
-            answer = Array.from(document.querySelectorAll('#numberList input:checked'))
-                .map(checkbox => parseInt(checkbox.value));
-        }
-        userAnswers.push(answer);
-        currentQuestionIndex++;
-        this.showNextQuestion();
-    }
-
-    // Show the final score after the quiz
-    showFinalScore() {
-        const allNumbers = Array.from(usedCombinations).map(Number);
-        const correctAnswers = [
-            Math.max(...allNumbers),
-            Math.min(...allNumbers),
-            allNumbers.filter(num => num < dynamicNumbers[0]),
-            allNumbers.filter(num => num > dynamicNumbers[1]),
-        ];
-
-        let score = 0;
-        userAnswers.forEach((answer, index) => {
-            if (questions[index].type === "single") {
-                if (answer === correctAnswers[index]) score++;
-            } else if (JSON.stringify(answer.sort()) === JSON.stringify(correctAnswers[index].sort())) score++;
-        });
-
-        const finalScorePopup = document.createElement('div');
-        finalScorePopup.id = 'finalScorePopup';
-        finalScorePopup.classList.add('popup');
-        finalScorePopup.innerHTML = `
-            <p><b>Quiz Completed! You scored ${score} out of ${questions.length}!</b></p>
-            <button onclick="window.location.reload();" class="demo-btn">OK</button>
-        `;
-        document.body.appendChild(finalScorePopup);
-        finalScorePopup.style.display = 'block';
-
-        // Dim the background
-        document.body.style.backgroundColor = 'rgba(0,0,0,0.5)';
-
-        // Disable all other elements
-        document.querySelectorAll('*').forEach(el => {
-            if (!el.classList.contains('popup')) {
-                el.style.pointerEvents = 'none';
-            }
-        });
-
-        // Enable popup and its elements
-        finalScorePopup.style.pointerEvents = 'auto';
-        finalScorePopup.querySelectorAll('*').forEach(el => {
-            el.style.pointerEvents = 'auto';
-        });
-    }
-
-    // Show the demo popup
-    showDemoPopup() {
-        const demoPopup = document.getElementById('demoPopup');
-        demoPopup.style.display = 'flex';
-
-        document.getElementById('demoYes').addEventListener('click', () => this.startDemo());
-        document.getElementById('demoNo').addEventListener('click', () => {
-            demoPopup.style.display = 'none';
-        });
-    }
-
-    // Start the demo mode
-    startDemo() {
-        demoMode = true; // Set demo mode flag to true
-        document.getElementById('demoPopup').style.display = 'none';
-        this.showDemoArrow(0);
-    }
-
-    // Show the demo arrow for guidance
-    showDemoArrow(index) {
-        if (index >= valueOfCards.length) {
-            document.getElementById('demoArrow').style.display = 'none';
+        if (isNaN(x) || x <= 0) {
+            messageDiv.innerHTML = "<div class='error'>Please enter a valid positive number.</div>";
+            chocolateDiv.innerHTML = "";
+            oatmealDiv.innerHTML = "";
+            chocolateLeftSpan.innerHTML = "";
+            oatmealLeftSpan.innerHTML = "";
             return;
         }
 
-        const buttons = document.querySelectorAll('.number-button');
-        buttons.forEach((button, idx) => {
-            button.disabled = idx !== index; // Enable only the button at the current index
-            button.style.backgroundColor = idx === index ? '#3498db' : '#f1c40f'; // Highlight the active button
-        });
-        const button = buttons[index];
-        const arrow = document.getElementById('demoArrow');
+        var chocolateRows = Math.floor(chocolateCount / x);
+        var oatmealRows = Math.floor(oatmealCount / x);
+        var chocolateLeft = chocolateCount % x;
+        var oatmealLeft = oatmealCount % x;
 
-        const buttonRect = button.getBoundingClientRect();
-        arrow.style.left = `${buttonRect.left + buttonRect.width / 2 - 30}px`; // Center the arrow
-        arrow.style.top = `${buttonRect.bottom + 10}px`; // Position below the button
-        arrow.style.display = 'block';
+        chocolateDiv.innerHTML = "";
+        oatmealDiv.innerHTML = "";
+        chocolateLeftSpan.innerHTML = "";
+        oatmealLeftSpan.innerHTML = "";
+        messageDiv.innerHTML = "";
 
-        button.addEventListener('click', () => this.showDemoArrow(index + 1), { once: true });
+        if (chocolateRows === 0 || oatmealRows === 0) {
+            messageDiv.innerHTML = "<div class='error'>The number you entered does not allow arranging cookies in rows. Try making another guess.</div>";
+            return;
+        }
+        if (oatmealLeft === 0 && chocolateLeft === 0) {
+            messageDiv.innerHTML = "<div class='success'>Bingo! Is there also another way of doing the same and hence more than 1 answer? Try!</div>";
+        }
+
+        for (var i = 0; i < chocolateRows; i++) {
+            var row = "";
+            for (var j = 0; j < x; j++) {
+                row += "<div class='cookie chocolate'>C</div>";
+            }
+            chocolateDiv.innerHTML += row + "<br>";
+        }
+        var extraChocolate = chocolateCount % x; // Calculate the number of additional chocolate cookies
+        for (var i = 0; i < extraChocolate; i++) { // Add extra chocolate cookies to the chocolateDiv
+            chocolateDiv.innerHTML += "<div class='cookie chocolate flash leftover'>C</div>";
+        }
+
+        for (var i = 0; i < oatmealRows; i++) {
+            var row = "";
+            for (var j = 0; j < x; j++) {
+                row += "<div class='cookie oatmeal'>O</div>";
+            }
+            oatmealDiv.innerHTML += row + "<br>";
+        }
+
+        var extraOatmeal = oatmealCount % x; // Calculate the number of additional oatmeal cookies
+        for (var i = 0; i < extraOatmeal; i++) { // Add extra oatmeal cookies to the oatmealDiv
+            oatmealDiv.innerHTML += "<div class='cookie oatmeal flash leftover'>O</div>";
+        }
+
+        if (chocolateLeft !== 0) {
+            chocolateLeftSpan.innerHTML = "Oops! The last row does not have same number of cookies as the rest. <br>" + x + " is not a factor of " + chocolateCount + ". Try another number.";
+        }
+
+        if (oatmealLeft !== 0) {
+            oatmealLeftSpan.innerHTML = "Oops! The last row does not have same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
+        }
+    };
+
+    if (showAnswer == 1) {
+        document.getElementById("inputNumber").value = answer;
+        checkGuess();
     }
-
-    // Show the demo over popup
-    showDemoOverPopup() {
-        const demoOverPopup = document.createElement('div');
-        demoOverPopup.id = 'demoOverPopup';
-        demoOverPopup.classList.add('demo-popup');
-        demoOverPopup.innerHTML = `
-            <div class="demo-popup-content">
-                <h4>Your Number is Generated</h4>
-                <h3>Do you want to see it again?</h3>
-                <div class="demo-buttons">
-                    <button id="demoOverYes" class="demo-btn">Yes</button>
-                    <button id="demoOverNo" class="demo-btn">No</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(demoOverPopup);
-
-        // Reset and clear function
-        const resetAndClear = () => {
-            // Reset the current number
-            currentNumber = '';
-            this.updateCurrentNumber();
-
-            // Clear the number list
-            document.getElementById('numberList').innerHTML = "";
-
-            // Clear used combinations
-            usedCombinations.clear();
-
-            // Reset all buttons
-            document.querySelectorAll('.number-button').forEach(button => {
-                button.disabled = false;
-                button.style.backgroundColor = '#3498db';
-            });
-        };
-
-        document.getElementById('demoOverYes').addEventListener('click', () => {
-            document.body.removeChild(demoOverPopup);
-            resetAndClear();
-            this.startDemo();
-        });
-
-        document.getElementById('demoOverNo').addEventListener('click', () => {
-            document.body.removeChild(demoOverPopup);
-            demoMode = false;
-        });
-    }
-}
-
-// Initialize the game
-new NumberCombinationInteractive();
+});
