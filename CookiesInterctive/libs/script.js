@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function calculateCookieSize(containerWidth, cookiesPerRow) {
-        var maxSize = 28;
-        var minSize = 6;
+        var maxSize = 30;
+        var minSize = 0;
         var size = Math.floor(containerWidth / cookiesPerRow) - 2; // 2px for margins
         return Math.max(Math.min(size, maxSize), minSize);
     }
