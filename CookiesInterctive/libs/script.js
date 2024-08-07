@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var oatmealCount = numbers[1];
     var showAnswer = getUrlParameter('showAnswer');
     var answer = getUrlParameter('answer') ? getUrlParameter('answer') : 0;
-    var mode = getUrlParameter('mode') || ''; // Get the mode parameter, default to empty string
+    var mode = getUrlParameter('mode') || '';
 
     function createCookie(type, isLeftover, size) {
         var cookie = document.createElement('div');
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
         messageDiv.innerHTML = "";
 
         if (chocolateRows === 0 || oatmealRows === 0) {
-            messageDiv.innerHTML = "<div class='error'>The number you entered does not allow arranging cookies in rows. Try making another guess.</div>";
+            messageDiv.innerHTML = "<div class='errors'>The number you entered does not allow arranging cookies in rows. Try making another guess.</div>";
             legend.style.display = "none";
             return;
         }
@@ -129,11 +129,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (chocolateLeft !== 0) {
-            chocolateLeftSpan.innerHTML = "Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + chocolateCount + ". Try another number.";
+            chocolateLeftSpan.innerHTML = "<br>Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + chocolateCount + ". Try another number.";
         }
 
         if (oatmealLeft !== 0) {
-            oatmealLeftSpan.innerHTML = "Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
+            oatmealLeftSpan.innerHTML = "<br>Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
         }
 
         legend.style.display = cookieSize <= 8 ? "block" : "none";
@@ -150,5 +150,5 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    console.log("Mode parameter value: ", mode); // Use mode parameter if needed
+    console.log("Mode parameter value: ", mode);
 });
