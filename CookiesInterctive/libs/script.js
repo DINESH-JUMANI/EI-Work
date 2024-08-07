@@ -39,17 +39,18 @@ document.addEventListener("DOMContentLoaded", function () {
     var oatmealCount = numbers[1];
     var showAnswer = getUrlParameter('showAnswer');
     var answer = getUrlParameter('answer') ? getUrlParameter('answer') : 0;
+    var mode = getUrlParameter('mode') || ''; // Get the mode parameter, default to empty string
 
     function createCookie(type, isLeftover, size) {
         var cookie = document.createElement('div');
         cookie.className = `cookie ${type}`;
         cookie.style.width = `${size}px`;
         cookie.style.height = `${size}px`;
-        cookie.style.fontSize = `${size / 2}px`;
+        cookie.style.fontSize = `${Math.max(size / 2, 8)}px`;
         if (isLeftover) {
             cookie.classList.add('flash', 'leftover');
         }
-        if (size > 10) {
+        if (size > 8) {
             cookie.textContent = type === 'chocolate' ? 'C' : 'O';
         }
         return cookie;
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function calculateCookieSize(containerWidth, cookiesPerRow) {
         var maxSize = 28;
-        var minSize = 8;
+        var minSize = 6;
         var size = Math.floor(containerWidth / cookiesPerRow) - 2; // 2px for margins
         return Math.max(Math.min(size, maxSize), minSize);
     }
@@ -135,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
             oatmealLeftSpan.innerHTML = "Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
         }
 
-        legend.style.display = cookieSize <= 10 ? "block" : "none";
+        legend.style.display = cookieSize <= 8 ? "block" : "none";
     };
 
     if (showAnswer == 1) {
@@ -148,4 +149,6 @@ document.addEventListener("DOMContentLoaded", function () {
             checkGuess();
         }
     });
+
+    console.log("Mode parameter value: ", mode); // Use mode parameter if needed
 });
