@@ -5,9 +5,9 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -23,20 +23,30 @@ body {
 }
 
 .instruction {
-    font-size: 20px;
+    font-size: 16px;
     color: #fff;
     margin-bottom: 10px;
 }
 
+.cookie-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.cookie-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
 .cookie {
-    display: inline-block;
-    width: 50px;
-    height: 50px;
+    flex: 0 0 auto;
     border-radius: 50%;
-    text-align: center;
-    font-size: 24px;
-    line-height: 50px;
-    margin: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1px;
 }
 
 .chocolate {
@@ -50,24 +60,26 @@ body {
 }
 
 .leftover {
-    border: 2px solid red;
+    border: 1px solid red;
 }
 
 #inputNumber {
-    padding: 10px;
+    padding: 5px;
     margin-bottom: 10px;
     border: 2px solid #ccc;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px;
+    width: 80%;
+    max-width: 200px;
 }
 
 #checkButton {
-    padding: 10px 20px;
+    padding: 5px 10px;
     background-color: #4CAF50;
     border: none;
     color: white;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s;
 }
@@ -79,15 +91,40 @@ body {
 .error {
     color: red;
     font-weight: bold;
+    font-size: 12px;
 }
 
 .success {
     color: green;
     font-weight: bold;
+    font-size: 12px;
 }
 
 .flash {
     animation: zoomInOut 1s infinite alternate;
+}
+
+.legend {
+    margin-top: 10px;
+    text-align: left;
+    display: none;
+    font-size: 12px;
+}
+
+.legend .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.legend .chocolate-dot {
+    background-color: #8B4513;
+}
+
+.legend .oatmeal-dot {
+    background-color: #DEB887;
 }
 
 @keyframes zoomInOut {
@@ -97,5 +134,16 @@ body {
 
     100% {
         transform: scale(1.1);
+    }
+}
+
+@media (max-width: 300px) {
+    .instruction {
+        font-size: 14px;
+    }
+
+    #inputNumber,
+    #checkButton {
+        font-size: 12px;
     }
 }
