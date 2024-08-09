@@ -13,12 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div id="message" class="error"></div> <!-- Moved success message above cookies -->
         <div id="chocolateRow">
-            <div class="instruction">Chocolate Chip Cookies:</div>
+            <div class="instruction"></div>
             <span id="chocolateLeft" class="error" style="display: block;"></span>
             <div id="chocolateCookies" class="cookie-container" style="overflow: hidden;"></div>
         </div>
         <div id="oatmealRow">
-            <div class="instruction">Oatmeal Raisin Cookies:</div>
+            <div class="instruction"></div>
             <span id="oatmealLeft" class="error" style="display: block;"></span>
             <div id="oatmealCookies" class="cookie-container" style="overflow: hidden;"></div>
         </div>
@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var showAnswer = getUrlParameter('showAnswer');
     var answer = getUrlParameter('answer') ? getUrlParameter('answer') : 0;
     var mode = getUrlParameter('mode') || '';
+    let factorsList = [1];
 
     function createCookie(type, isLeftover, size) {
         var cookie = document.createElement('div');
@@ -131,7 +132,54 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         legend.style.display = "block"; // Always show the legend
+
+        // Additional functionality for commonFactors mode
+        if (mode === "commonFactors" && numbers[0] % x === 0 && numbers[1] % x === 0) {
+            if (!factorsList.includes(x)) {
+                factorsList.push(x);
+                document.getElementById("factorsList").innerText = factorsList.join(', ');
+            }
+        }
     };
+
+    if (mode === "commonFactors") {
+        document.querySelector('.instructionBox').innerHTML = `
+            <div class="instruction">Find all common factors of ${numbers[0]} and ${numbers[1]}</div>
+        `;
+        document.querySelector('.instructionBox').style.backgroundColor = "#ffcc00"; // Yellow background
+        const dividerSection = document.createElement('div');
+        dividerSection.innerHTML = `
+            <hr class="blue-divider">
+            <div id="factorsList">1</div>
+            <hr class="blue-divider">
+        `;
+        document.querySelector('.container').insertBefore(dividerSection, document.querySelector('.legend'));
+        
+        const completionSection = document.createElement('div');
+        completionSection.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <span style="margin-right: 10px;">Did you find all the factors?</span>
+                <button id="allFactorsButton">Yes</button>
+            </div>
+        `;
+        document.querySelector('.container').insertBefore(completionSection, document.querySelector('.legend'));
+        
+        document.getElementById('allFactorsButton').addEventListener('click', function() {
+            const correctFactors = findCommonFactors(numbers[0], numbers[1]);
+            if (arraysEqual(factorsList.sort((a, b) => a - b), correctFactors.sort((a, b) => a - b))) {
+                alert("Hooray! You found them ALL!");
+            } else {
+                alert("Oops! Some common factors are missing.\nExplore and FIND them ALL!");
+                document.getElementById('allFactorsButton').addEventListener('click', function() {
+                    if (arraysEqual(factorsList.sort((a, b) => a - b), correctFactors.sort((a, b) => a - b))) {
+                        alert("Hooray! You found them ALL!");
+                    } else {
+                        alert(`Nice try! But some factors are still missing.\nThe common factors of ${numbers[0]} and ${numbers[1]} are ${correctFactors.join(', ')}. Which ones did you miss?`);
+                    }
+                });
+            }
+        });
+    }
 
     if (showAnswer == 1) {
         document.getElementById("inputNumber").value = answer;
@@ -145,4 +193,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     console.log("Mode parameter value: ", mode);
+
+    function findCommonFactors(a, b) {
+        const min = Math.min(a, b);
+        const factors = [];
+        for (let i = 1; i <= min; i++) {
+            if (a % i === 0 && b % i === 0) {
+                factors.push(i);
+            }
+        }
+        return factors;
+    }
+
+    function arraysEqual(a, b) {
+        return a.length === b.length && a.every((val, index) => val === b[index]);
+    }
 });

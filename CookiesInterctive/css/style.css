@@ -14,7 +14,7 @@ body {
 }
 
 .instructionBox {
-    background-color: #3399ff;
+    background-color: #3399ff; /* original blue background */
     color: white;
     padding: 10px;
     margin-bottom: 20px;
@@ -24,8 +24,9 @@ body {
 
 .instruction {
     font-size: 16px;
-    color: #fff;
+    color: black;
     margin-bottom: 10px;
+    font-weight: bolder;
 }
 
 .cookie-container {
@@ -155,4 +156,32 @@ span#chocolateLeft {
 
 span#oatmealLeft {
     margin-bottom: 2%;
+}
+
+/* New styles for the commonFactors mode */
+.blue-divider {
+    border: 2px solid rgb(2, 132, 231);
+    margin: 10px auto;
+    width: 50%;
+}
+
+#factorsList {
+    font-weight: bold;
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+#allFactorsButton {
+    padding: 5px 10px;
+    background-color: rgb(2, 132, 231);
+    border: none;
+    color: white;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#allFactorsButton:hover {
+    background-color: blue;
 }
