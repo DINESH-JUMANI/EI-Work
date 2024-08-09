@@ -14,7 +14,7 @@ body {
 }
 
 .instructionBox {
-    background-color: #3399ff;
+    background-color: #3399ff; /* original blue background */
     color: white;
     padding: 10px;
     margin-bottom: 20px;
@@ -155,4 +155,31 @@ span#chocolateLeft {
 
 span#oatmealLeft {
     margin-bottom: 2%;
+}
+
+/* New styles for the commonFactors mode */
+.blue-divider {
+    border: 2px solid blue;
+    margin: 10px 0;
+}
+
+#factorsList {
+    font-weight: bold;
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+#allFactorsButton {
+    padding: 5px 10px;
+    background-color: #ffcc00;
+    border: none;
+    color: black;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#allFactorsButton:hover {
+    background-color: #e6b800;
 }
