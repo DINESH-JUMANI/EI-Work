@@ -167,9 +167,16 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('allFactorsButton').addEventListener('click', function() {
             const correctFactors = findCommonFactors(numbers[0], numbers[1]);
             if (arraysEqual(factorsList.sort((a, b) => a - b), correctFactors.sort((a, b) => a - b))) {
-                alert("Hoorah! You found all the factors!");
+                alert("Hooray! You found them ALL!");
             } else {
-                alert("You're wrong! Keep trying.");
+                alert("Oops! Some common factors are missing.\nExplore and FIND them ALL!");
+                document.getElementById('allFactorsButton').addEventListener('click', function() {
+                    if (arraysEqual(factorsList.sort((a, b) => a - b), correctFactors.sort((a, b) => a - b))) {
+                        alert("Hooray! You found them ALL!");
+                    } else {
+                        alert(`Nice try! But some factors are still missing.\nThe common factors of ${numbers[0]} and ${numbers[1]} are ${correctFactors.join(', ')}. Which ones did you miss?`);
+                    }
+                });
             }
         });
     }
