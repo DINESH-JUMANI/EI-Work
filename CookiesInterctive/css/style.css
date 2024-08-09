@@ -24,8 +24,9 @@ body {
 
 .instruction {
     font-size: 16px;
-    color: #fff;
+    color: black;
     margin-bottom: 10px;
+    font-weight: bolder;
 }
 
 .cookie-container {
@@ -159,8 +160,9 @@ span#oatmealLeft {
 
 /* New styles for the commonFactors mode */
 .blue-divider {
-    border: 2px solid blue;
-    margin: 10px 0;
+    border: 2px solid rgb(2, 132, 231);
+    margin: 10px auto;
+    width: 50%;
 }
 
 #factorsList {
@@ -171,9 +173,9 @@ span#oatmealLeft {
 
 #allFactorsButton {
     padding: 5px 10px;
-    background-color: #ffcc00;
+    background-color: rgb(2, 132, 231);
     border: none;
-    color: black;
+    color: white;
     border-radius: 5px;
     font-size: 14px;
     cursor: pointer;
@@ -181,5 +183,5 @@ span#oatmealLeft {
 }
 
 #allFactorsButton:hover {
-    background-color: #e6b800;
+    background-color: blue;
 }

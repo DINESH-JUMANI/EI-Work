@@ -13,12 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <div id="message" class="error"></div> <!-- Moved success message above cookies -->
         <div id="chocolateRow">
-            <div class="instruction">Chocolate Chip Cookies:</div>
+            <div class="instruction"></div>
             <span id="chocolateLeft" class="error" style="display: block;"></span>
             <div id="chocolateCookies" class="cookie-container" style="overflow: hidden;"></div>
         </div>
         <div id="oatmealRow">
-            <div class="instruction">Oatmeal Raisin Cookies:</div>
+            <div class="instruction"></div>
             <span id="oatmealLeft" class="error" style="display: block;"></span>
             <div id="oatmealCookies" class="cookie-container" style="overflow: hidden;"></div>
         </div>
@@ -157,11 +157,12 @@ document.addEventListener("DOMContentLoaded", function () {
         
         const completionSection = document.createElement('div');
         completionSection.innerHTML = `
-            <div>
-                <button id="allFactorsButton">Did you find all factors?</button>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <span style="margin-right: 10px;">Did you find all the factors?</span>
+                <button id="allFactorsButton">Yes</button>
             </div>
         `;
-        document.querySelector('.container').appendChild(completionSection);
+        document.querySelector('.container').insertBefore(completionSection, document.querySelector('.legend'));
         
         document.getElementById('allFactorsButton').addEventListener('click', function() {
             const correctFactors = findCommonFactors(numbers[0], numbers[1]);
