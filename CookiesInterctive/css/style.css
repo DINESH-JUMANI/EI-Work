@@ -98,6 +98,7 @@ body {
     color: green;
     font-weight: bold;
     font-size: 12px;
+    margin-top: 2%;
 }
 
 .flash {
@@ -146,4 +147,12 @@ body {
     #checkButton {
         font-size: 12px;
     }
+}
+
+span#chocolateLeft {
+    margin-bottom: 2%;
+}
+
+span#oatmealLeft {
+    margin-bottom: 2%;
 }

@@ -11,18 +11,18 @@ document.addEventListener("DOMContentLoaded", function () {
             <span><span class="dot chocolate-dot"></span> Chocolate Chip Cookie</span>
             <span style="margin-left: 10px;"><span class="dot oatmeal-dot"></span> Oatmeal Raisin Cookie</span>
         </div>
+        <div id="message" class="error"></div> <!-- Moved success message above cookies -->
         <div id="chocolateRow">
             <div class="instruction">Chocolate Chip Cookies:</div>
-            <div id="chocolateCookies" class="cookie-container"></div>
-            <span id="chocolateLeft" class="error"></span>
+            <span id="chocolateLeft" class="error" style="display: block;"></span>
+            <div id="chocolateCookies" class="cookie-container" style="overflow: hidden;"></div>
         </div>
         <div id="oatmealRow">
             <div class="instruction">Oatmeal Raisin Cookies:</div>
-            <div id="oatmealCookies" class="cookie-container"></div>
-            <span id="oatmealLeft" class="error"></span>
+            <span id="oatmealLeft" class="error" style="display: block;"></span>
+            <div id="oatmealCookies" class="cookie-container" style="overflow: hidden;"></div>
         </div>
         <br>
-        <div id="message" class="error"></div>
     </div>
     `;
 
@@ -80,10 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (isNaN(x) || x <= 0) {
             messageDiv.innerHTML = "<div class='error'>Please enter a valid positive number.</div>";
-            chocolateDiv.innerHTML = "";
-            oatmealDiv.innerHTML = "";
-            chocolateLeftSpan.innerHTML = "";
-            oatmealLeftSpan.innerHTML = "";
             legend.style.display = "none";
             return;
         }
@@ -126,11 +122,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (chocolateLeft !== 0) {
-            chocolateLeftSpan.innerHTML = "<br>Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + chocolateCount + ". Try another number.";
+            chocolateLeftSpan.innerHTML = "Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + chocolateCount + ". Try another number.";
         }
 
         if (oatmealLeft !== 0) {
-            oatmealLeftSpan.innerHTML = "<br>Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
+            oatmealLeftSpan.innerHTML = "Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
         }
 
         legend.style.display = "block"; // Always show the legend
