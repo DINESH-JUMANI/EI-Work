@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <div id="oatmealCookies" class="cookie-container"></div>
             <span id="oatmealLeft" class="error"></span>
         </div>
-        <div class="legend">
+        <div class="legend" style="display: block;">
             <div><span class="dot chocolate-dot"></span> Chocolate Chip Cookie</div>
             <div><span class="dot oatmeal-dot"></span> Oatmeal Raisin Cookie</div>
         </div>
@@ -49,9 +49,6 @@ document.addEventListener("DOMContentLoaded", function () {
         cookie.style.fontSize = `${Math.max(size / 2, 8)}px`;
         if (isLeftover) {
             cookie.classList.add('flash', 'leftover');
-        }
-        if (size > 8) {
-            cookie.textContent = type === 'chocolate' ? 'C' : 'O';
         }
         return cookie;
     }
@@ -136,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
             oatmealLeftSpan.innerHTML = "<br>Oops! The last row does not have the same number of cookies as the rest. <br>" + x + " is not a factor of " + oatmealCount + ". Try another number.";
         }
 
-        legend.style.display = cookieSize <= 8 ? "block" : "none";
+        legend.style.display = "block"; // Always show the legend
     };
 
     if (showAnswer == 1) {
