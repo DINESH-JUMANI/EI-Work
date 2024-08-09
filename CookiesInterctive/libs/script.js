@@ -62,11 +62,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return row;
     }
 
-    function calculateCookieSize(containerWidth, cookiesPerRow) {
-        var maxSize = 30;
-        var minSize = 0;
-        var size = Math.floor(containerWidth / cookiesPerRow) - 2; // 2px for margins
-        return Math.max(Math.min(size, maxSize), minSize);
+    function calculateCookieSize(containerWidth, containerHeight, cookiesPerRow, totalRows) {
+        var maxWidthSize = Math.floor(containerWidth / cookiesPerRow) - 2;
+        var maxHeightSize = Math.floor(containerHeight / totalRows) - 15;
+        return Math.max(Math.min(maxWidthSize, maxHeightSize), 6);
     }
 
     window.checkGuess = function () {
@@ -105,7 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var containerWidth = chocolateDiv.offsetWidth;
-        var cookieSize = calculateCookieSize(containerWidth, x);
+        var containerHeight = window.innerHeight - document.querySelector('.instructionBox').offsetHeight - 70; // Subtract fixed elements height and 
+        var totalRows = chocolateRows + oatmealRows + (chocolateLeft > 0 ? 1 : 0) + (oatmealLeft > 0 ? 1 : 0);
+        var cookieSize = calculateCookieSize(containerWidth, containerHeight, x, totalRows);
 
         for (var i = 0; i < chocolateRows; i++) {
             chocolateDiv.appendChild(createCookieRow(x, 'chocolate', false, cookieSize));
