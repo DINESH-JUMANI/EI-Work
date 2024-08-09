@@ -1,6 +1,22 @@
-// Global variables
-const numberOfCards = 3;
-const valueOfCards = [7, 4, 2];
+function getUrlParams() {
+    const params = {};
+    const queryString = window.location.search.substring(1);
+    const pairs = queryString.split("&");
+
+    pairs.forEach(pair => {
+        const [key, value] = pair.split("=");
+        params[key] = decodeURIComponent(value);
+    });
+
+    return params;
+}
+
+// Get URL parameters and initialize variables
+const urlParams = getUrlParams();
+const numberOfCards = urlParams.NoOfCards ? parseInt(urlParams.NoOfCards) : 3;
+const cardsNumber = urlParams.cards ? urlParams.cards : '7;4;2';
+const valueOfCards = cardsNumber.split(';').map(Number);
+let result = 2; //user has not answered the question
 let dynamicNumbers = [];
 let questions = [];
 let currentNumber = '';
@@ -8,7 +24,7 @@ let usedCombinations = new Set();
 const totalPossibleCombinations = factorial(numberOfCards);
 let userAnswers = [];
 let currentQuestionIndex = 0;
-let demoMode = false; // Flag to track demo mode
+let demoMode = false;
 
 // Utility function to calculate factorial
 function factorial(n) {
@@ -40,8 +56,8 @@ class NumberCombinationInteractive {
 
     // Generate a random dynamic number
     generateDynamicNumber() {
-        const minValue = Math.min(...valueOfCards)+1;
-        const maxValue = Math.max(...valueOfCards)-1;
+        const minValue = Math.min(...valueOfCards) + 1;
+        const maxValue = Math.max(...valueOfCards) - 1;
         const randomSmallNumber = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         return randomSmallNumber * Math.pow(10, numberOfCards - 1);
     }
@@ -58,7 +74,7 @@ class NumberCombinationInteractive {
         rightPanel.classList.add('right-panel');
 
         const leftPanelHeading = document.createElement('h2');
-        leftPanelHeading.textContent = 'Shown below are few Number Cards';
+        leftPanelHeading.textContent = 'Shown below are few number cards';
 
         const buttonContainer = document.createElement('div');
         buttonContainer.classList.add('button-container');
@@ -79,15 +95,20 @@ class NumberCombinationInteractive {
         numberList.classList.add('number-list');
         numberList.id = 'numberList';
 
-        const popup = document.createElement('div');
-        popup.classList.add('popup');
-        popup.id = 'popup';
-        popup.innerHTML = '<p><b>This combination has already been used!</b></p>';
+        const usedCombinationPopup = document.createElement('div');
+        usedCombinationPopup.classList.add('popup');
+        usedCombinationPopup.id = 'usedCombinationPopup';
+        usedCombinationPopup.innerHTML = '<p><b>This combination has already been used!</b></p>';
+
+        const answerPopup = document.createElement('div');
+        answerPopup.classList.add('popup');
+        answerPopup.id = 'answerPopup';
+        answerPopup.style.display = 'none';
 
         leftPanel.append(leftPanelHeading, buttonContainer, currentNumberDiv, questionContainer);
         rightPanel.append(rightPanelHeading, numberList);
         container.append(leftPanel, rightPanel);
-        document.body.append(container, popup);
+        document.body.append(container, usedCombinationPopup, answerPopup);
 
         const demoPopup = this.createDemoPopup();
         const demoArrow = this.createDemoArrow();
@@ -164,7 +185,7 @@ class NumberCombinationInteractive {
     // Check if the current number combination is valid
     checkCombination() {
         if (usedCombinations.has(currentNumber)) {
-            this.showPopup();
+            this.showUsedCombinationPopup();
         } else {
             usedCombinations.add(currentNumber);
             this.displayCombination();
@@ -206,12 +227,28 @@ class NumberCombinationInteractive {
         });
     }
 
-    // Show a popup message
-    showPopup() {
-        const popup = document.getElementById('popup');
+    // Show a popup message for used combinations
+    showUsedCombinationPopup() {
+        const popup = document.getElementById('usedCombinationPopup');
         popup.style.display = 'block';
         setTimeout(() => {
             popup.style.display = 'none';
+        }, 2000);
+    }
+
+    // Show a popup message for answer feedback
+    showAnswerPopup(isCorrect) {
+        const popup = document.getElementById('answerPopup');
+        popup.innerHTML = `<p><b>${isCorrect ? 'You Entered Correct Answer' : 'You Entered Wrong Answer'}</b></p>`;
+        popup.style.color = isCorrect ? 'green' : 'red';
+        popup.style.display = 'block';
+        setTimeout(() => {
+            popup.style.display = 'none';
+            if (currentQuestionIndex >= questions.length) {
+                this.showFinalScore();
+            } else {
+                this.showNextQuestion();
+            }
         }, 2000);
     }
 
@@ -289,19 +326,36 @@ class NumberCombinationInteractive {
                 .map(checkbox => parseInt(checkbox.value));
         }
         userAnswers.push(answer);
+        const correctAnswers = this.getCorrectAnswers();
+        const isCorrect = this.checkIfAnswerIsCorrect(answer, correctAnswers);
+        this.showAnswerPopup(isCorrect);
         currentQuestionIndex++;
-        this.showNextQuestion();
     }
 
-    // Show the final score after the quiz
-    showFinalScore() {
+    // Get correct answers for the current question
+    getCorrectAnswers() {
         const allNumbers = Array.from(usedCombinations).map(Number);
-        const correctAnswers = [
+        return [
             Math.max(...allNumbers),
             Math.min(...allNumbers),
             allNumbers.filter(num => num < dynamicNumbers[0]),
             allNumbers.filter(num => num > dynamicNumbers[1]),
         ];
+    }
+
+    // Check if the user's answer is correct
+    checkIfAnswerIsCorrect(answer, correctAnswers) {
+        if (questions[currentQuestionIndex].type === "single") {
+            return answer === correctAnswers[currentQuestionIndex];
+        } else {
+            return JSON.stringify(answer.sort()) === JSON.stringify(correctAnswers[currentQuestionIndex].sort());
+        }
+    }
+
+    // Show the final score after the quiz
+    showFinalScore() {
+        const allNumbers = Array.from(usedCombinations).map(Number);
+        const correctAnswers = this.getCorrectAnswers();
 
         let score = 0;
         userAnswers.forEach((answer, index) => {
@@ -314,9 +368,14 @@ class NumberCombinationInteractive {
         finalScorePopup.id = 'finalScorePopup';
         finalScorePopup.classList.add('popup');
         finalScorePopup.innerHTML = `
-            <p><b>Quiz Completed! You scored ${score} out of ${questions.length}!</b></p>
-            <button onclick="window.location.reload();" class="demo-btn">OK</button>
+            <p><b>Please click on the submit button</b></p>
         `;
+
+        if (score == questions.length) {
+            result = 1; //user has answered all questions correctly
+        } else {
+            result = 0;
+        }
         document.body.appendChild(finalScorePopup);
         finalScorePopup.style.display = 'block';
 
@@ -385,7 +444,7 @@ class NumberCombinationInteractive {
         demoOverPopup.classList.add('demo-popup');
         demoOverPopup.innerHTML = `
             <div class="demo-popup-content">
-                <h4>Your Number is Generated</h4>
+                <h4>Your number is generated</h4>
                 <h3>Do you want to see it again?</h3>
                 <div class="demo-buttons">
                     <button id="demoOverYes" class="demo-btn">Yes</button>
