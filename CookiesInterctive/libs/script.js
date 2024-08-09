@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         <input type="number" id="inputNumber" placeholder="Enter a number">
         <button id="checkButton" onclick="checkGuess()">Check</button>
+        <div class="legend" style="display: block; text-align: center; display: flex; justify-content: center;">
+            <span><span class="dot chocolate-dot"></span> Chocolate Chip Cookie</span>
+            <span style="margin-left: 10px;"><span class="dot oatmeal-dot"></span> Oatmeal Raisin Cookie</span>
+        </div>
         <div id="chocolateRow">
             <div class="instruction">Chocolate Chip Cookies:</div>
             <div id="chocolateCookies" class="cookie-container"></div>
@@ -16,10 +20,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <div class="instruction">Oatmeal Raisin Cookies:</div>
             <div id="oatmealCookies" class="cookie-container"></div>
             <span id="oatmealLeft" class="error"></span>
-        </div>
-        <div class="legend" style="display: block;">
-            <div><span class="dot chocolate-dot"></span> Chocolate Chip Cookie</div>
-            <div><span class="dot oatmeal-dot"></span> Oatmeal Raisin Cookie</div>
         </div>
         <br>
         <div id="message" class="error"></div>
